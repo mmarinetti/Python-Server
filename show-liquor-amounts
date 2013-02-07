@@ -1,0 +1,17 @@
+import drinkz.db
+from sets import Set
+
+drinkz.db.add_bottle_type('Johnnie Walker', 'Black Label', 'blended scotch')
+drinkz.db.add_to_inventory('Johnnie Walker', 'Black Label', '1000 ml')
+drinkz.db.add_to_inventory('Johnnie Walker', 'Black Label', '100 oz')
+drinkz.db.add_bottle_type('SomeCompany', 'Generic Name', 'fancy')
+drinkz.db.add_to_inventory('SomeCompany', 'Generic Name', '342 ml')
+
+duplicates = Set([])
+
+print 'Manufacturer\tLiquor    \tAmount'
+print '------------\t------    \t------'
+for mfg, liquor in drinkz.db.get_liquor_inventory():
+    if (mfg, liquor) not in duplicates:
+        print '%s\t%s\t%s' % (mfg, liquor, drinkz.db.get_liquor_amount(mfg, liquor))
+    duplicates.add((mfg, liquor))

@@ -1,0 +1,2 @@
+#load bulk inventory
+Johnnie Walker,Black Label,1000 ml
