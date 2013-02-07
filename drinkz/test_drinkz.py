@@ -74,6 +74,33 @@ def test_get_liquor_amount_2():
     amount = db.get_liquor_amount('Johnnie Walker', 'Black Label')
     assert amount == '1000 ml', amount
 
+def test_get_liquor_amount_3():
+    db._reset_db()
+
+    db.add_bottle_type('Johnnie Walker', 'Black Label', 'blended scotch')
+
+    data = "Johnnie Walker,Black Label,100 oz"
+    fp = StringIO(data)
+    n = load_bulk_data.load_inventory(fp)
+
+    amount = db.get_liquor_amount('Johnnie Walker', 'Black Label')
+    assert amount == '2957 ml', amount
+
+def test_get_liquor_amount_4():
+    db._reset_db()
+
+    db.add_bottle_type('Johnnie Walker', 'Black Label', 'blended scotch')
+
+    data = "Johnnie Walker,Black Label,1000 ml"
+    data2 = "Johnnie Walker,Black Label,100 oz"
+    fp = StringIO(data)
+    fp2 = StringIO(data2)
+    n = load_bulk_data.load_inventory(fp)
+    n2 = load_bulk_data.load_inventory(fp2)
+
+    amount = db.get_liquor_amount('Johnnie Walker', 'Black Label')
+    assert amount == '3957 ml', amount
+
 def test_bulk_load_bottle_types_1():
     db._reset_db()
 
@@ -90,6 +117,13 @@ def test_script_load_bottle_types_1():
     exit_code = module.main([scriptpath, 'test-data/bottle-types-data-1.txt'])
 
     assert exit_code == 0, 'non zero exit code %s' % exit_code
+
+def test_script_load_inventory_1():
+    scriptpath = 'bin/load-liquor-inventory'
+    module = imp.load_source('llt', scriptpath)
+    exit_code = module.main([scriptpath, 'test-data/bottle-types-data-1.txt'])
+
+    assert exit_code == 0, 'non zero exit code %s' % exit_code
     
 def test_get_liquor_inventory():
     db._reset_db()
@@ -102,3 +136,22 @@ def test_get_liquor_inventory():
         x.append((mfg, liquor))
 
     assert x == [('Johnnie Walker', 'Black Label')], x
+
+def test_skip_comments():
+    db._reset_db()
+
+    data = "#Johnnie Walker,Black Label,blended scotch"
+    fp = StringIO(data)
+    n = load_bulk_data.load_bottle_types(fp)
+
+    assert n == 0, n
+
+def test_skip_blank():
+    db._reset_db()
+
+    data = " "
+    fp = StringIO(data)
+    n = load_bulk_data.load_bottle_types(fp)
+
+    assert n == 0, n
+
