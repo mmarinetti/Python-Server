@@ -48,7 +48,7 @@ def test_get_liquor_amount_1():
     db.add_bottle_type('Johnnie Walker', 'Black Label', 'blended scotch')
     db.add_to_inventory('Johnnie Walker', 'Black Label', '1000 ml')
     amount = db.get_liquor_amount('Johnnie Walker', 'Black Label')
-    assert amount == '1000 ml', amount
+    assert amount == 1000, amount
 
 def test_bulk_load_inventory_1():
     db._reset_db()
@@ -72,7 +72,34 @@ def test_get_liquor_amount_2():
     n = load_bulk_data.load_inventory(fp)
 
     amount = db.get_liquor_amount('Johnnie Walker', 'Black Label')
-    assert amount == '1000 ml', amount
+    assert amount == 1000, amount
+
+def test_get_liquor_amount_3():
+    db._reset_db()
+
+    db.add_bottle_type('Johnnie Walker', 'Black Label', 'blended scotch')
+
+    data = "Johnnie Walker,Black Label,100 oz"
+    fp = StringIO(data)
+    n = load_bulk_data.load_inventory(fp)
+
+    amount = db.get_liquor_amount('Johnnie Walker', 'Black Label')
+    assert amount == 2957.35, amount
+
+def test_get_liquor_amount_4():
+    db._reset_db()
+
+    db.add_bottle_type('Johnnie Walker', 'Black Label', 'blended scotch')
+
+    data = "Johnnie Walker,Black Label,1000 ml"
+    data2 = "Johnnie Walker,Black Label,100 oz"
+    fp = StringIO(data)
+    fp2 = StringIO(data2)
+    n = load_bulk_data.load_inventory(fp)
+    n2 = load_bulk_data.load_inventory(fp2)
+
+    amount = db.get_liquor_amount('Johnnie Walker', 'Black Label')
+    assert amount == 3957.35, amount
 
 def test_bulk_load_bottle_types_1():
     db._reset_db()
@@ -90,6 +117,14 @@ def test_script_load_bottle_types_1():
     exit_code = module.main([scriptpath, 'test-data/bottle-types-data-1.txt'])
 
     assert exit_code == 0, 'non zero exit code %s' % exit_code
+
+def test_script_load_inventory_1():
+    scriptpath = 'bin/load-liquor-inventory'
+    module = imp.load_source('llt', scriptpath)
+    exit_code = module.main([scriptpath, 'test-data/bottle-types-data-1.txt',
+'test-data/inventory-data-1.txt'])
+
+    assert exit_code == 0, 'non zero exit code %s' % exit_code
     
 def test_get_liquor_inventory():
     db._reset_db()
@@ -102,3 +137,41 @@ def test_get_liquor_inventory():
         x.append((mfg, liquor))
 
     assert x == [('Johnnie Walker', 'Black Label')], x
+
+def test_skip_comments():
+    db._reset_db()
+
+    data = "#Johnnie Walker,Black Label,blended scotch"
+    fp = StringIO(data)
+    n = load_bulk_data.load_bottle_types(fp)
+
+    assert n == 0, n
+
+def test_skip_blank():
+    db._reset_db()
+
+    data = " "
+    fp = StringIO(data)
+    n = load_bulk_data.load_bottle_types(fp)
+
+    assert n == 0, n
+
+def test_convert_ml():
+    x = db.convert_to_ml("10 ml")
+
+    assert x == 10, x
+
+def test_convert_oz():
+    x = db.convert_to_ml("20 oz")
+
+    assert x == 591.47, x
+
+def test_convert_gallon():
+    x = db.convert_to_ml("2 gallon")
+
+    assert x == 7570.82, x
+
+def test_convert_liter():
+    x = db.convert_to_ml("3 liter")
+
+    assert x == 3000, x
