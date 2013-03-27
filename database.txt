@@ -1,0 +1,104 @@
+(ccopy_reg
+_reconstructor
+p1
+(csets
+Set
+p2
+c__builtin__
+object
+p3
+NtRp4
+((dp5
+(S'Johnnie Walker'
+p6
+S'black label'
+p7
+S'blended scotch'
+p8
+tp9
+I01
+s(S'Gray Goose'
+p10
+S'vodka'
+p11
+S'unflavored vodka'
+p12
+tp13
+I01
+s(S"Uncle Herman's"
+p14
+S'moonshine'
+p15
+g8
+tp16
+I01
+s(S'Rossi'
+p17
+S'extra dry vermouth'
+p18
+S'vermouth'
+p19
+tp20
+I01
+stb(dp21
+(g6
+g7
+tp22
+F500
+s(g17
+g18
+tp23
+F709.76400000000001
+s(g14
+g15
+tp24
+F5000
+s(g10
+g11
+tp25
+F1000
+sg1
+(g2
+g3
+NtRp26
+((dp27
+g1
+(cdrinkz.recipes
+Recipe
+p28
+g3
+NtRp29
+(dp30
+S'name'
+p31
+S'vodka martini'
+p32
+sS'ingredients'
+p33
+(lp34
+(g12
+S'6 oz'
+p35
+tp36
+a(g19
+S'1.5 oz'
+p37
+tp38
+asbI01
+sg1
+(g28
+g3
+NtRp39
+(dp40
+g31
+S'scotch on the rocks'
+p41
+sg33
+(lp42
+(g8
+S'4 oz'
+p43
+tp44
+asbI01
+stbtp45
+.
