@@ -275,14 +275,16 @@ font-size: 14px;
     def rpc_convert_units_to_ml(self, amount):
          return db.convert_to_ml(amount)
 
-    def rpc_get_recipe_names():
+    def rpc_get_recipe_names(self):
+        names = [] 
         for r in db.get_all_recipes():
-            yield r.name
+            names.append(r.name)
+        return names
 
-    def rpc_get_liquor_inventory():
+    def rpc_get_liquor_inventory(self):
         inventory = []
-        for l in db.get_liquor_inventory():
-            inventory.append(l)
+        for m, l in db.get_liquor_inventory():
+            inventory.append((m,l))
         return inventory
     
 def form():
