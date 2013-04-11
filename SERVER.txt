@@ -1,0 +1,13 @@
+Server takes GET and the the destination following GET
+Example:
+GET /[path]
+
+Available paths:
+GET /
+GET /recipes
+GET /inventory
+GET /liquor_types
+GET /convert_to_ml
+GET /add_recipe
+GET /add_liquor_type
+GET /add_to_inventory

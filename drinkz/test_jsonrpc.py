@@ -61,3 +61,28 @@ def test_json_get_liquor_inventory():
 
     assert ['Johnnie Walker', 'black label'] in results['result'], results['result']
 
+def test_json_add_recipe():
+    db._reset_db()
+    
+    call_remote(method='add_recipe', params=['scotch on the rocks', 
+                                             'blended scotch', '4 oz'], id=1)
+
+    assert db.get_recipe('scotch on the rocks').name == 'scotch on the rocks'
+
+def test_json_add_liquor_type():
+    db._reset_db()
+
+    call_remote(method='add_liquor_type', params=['Johnnie Walker', 'black label',
+                                                  'blended scotch'], id=1)
+
+    assert db._check_bottle_type_exists('Johnnie Walker', 'black label')
+
+def test_json_add_to_inventory():
+    db._reset_db()
+
+    call_remote(method='add_liquor_type', params=['Johnnie Walker', 'black label',
+                                                  'blended scotch'], id=1)
+    call_remote(method='add_to_inventory', params=['Johnnie Walker', 'black label',
+                                                   '4 oz'], id=1)
+
+    assert db.get_liquor_amount('Johnnie Walker', 'black label') == 118.294

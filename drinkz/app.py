@@ -4,6 +4,8 @@ import urlparse
 import simplejson
 import recipes, db
 import sys
+import jinja2
+import os
 
 dispatch = {
     '/' : 'index',
@@ -12,7 +14,13 @@ dispatch = {
     '/inventory' : 'inventory',
     '/liquor_types' : 'liquor_types',
     '/convert_to_ml' : 'convert_to_ml',
+    '/add_recipe' : 'add_recipe_jinja',
+    '/add_liquor_type' : 'add_liquor_type',
+    '/add_to_inventory' : 'add_to_inventory',
     '/recv' : 'recv',
+    '/recv_recipes' : 'recv_recipes',
+    '/recv_liquor_types' : 'recv_liquor_types',
+    '/recv_inventory' : 'recv_inventory',
     '/rpc'  : 'dispatch_rpc'
 }
 
@@ -59,6 +67,9 @@ alert("Welcome to Drinkz!");
 <a href='inventory'>Inventory</a>,
 <a href='liquor_types'>Liquor Types</a>,
 <a href='convert_to_ml'>Convert to ml</a>
+<a href='add_recipe'>Add Recipe</a>
+<a href='add_liquor_type'>Add Liquor Type</a>
+<a href='add_to_inventory'>Add To Inventory</a>
 <p>
 <input type="button" onclick="popUpBox()" value="Show alert box" />
 </body>
@@ -226,6 +237,127 @@ font-size: 14px;
         start_response('200 OK', list(html_headers))
         return [data]
 
+    def add_recipe_jinja(self, environ, start_response):
+        loader = jinja2.FileSystemLoader('./drinkz/templates')
+        env = jinja2.Environment(loader=loader)
+
+        vars = dict(title='Add Recipe', name='Add Recipe')
+
+        template = env.get_template('recipes.html')
+        data = template.render(vars).encode('utf-8')
+
+        start_response('200 OK', list(html_headers))
+        return [data]
+
+    def recv_recipes(self, environ, start_response):
+        formdata = environ['QUERY_STRING']
+        results = urlparse.parse_qs(formdata)
+
+        name = results['name'][0]
+        ing1 = results['ing1'][0]
+        amount1 = results['amount1'][0]
+        try:
+            ing2 = results['ing2'][0]
+            amount2 = results['amount2'][0]
+            r = recipes.Recipe(name, [(ing1, amount1), (ing2, amount2)])
+        except KeyError:
+            r = recipes.Recipe(name, [(ing1, amount1)])
+            ing2, amount2 = "", ""
+
+        db.add_recipe(r)
+    
+        content_type = 'text/html'
+        data = """\
+Added recipe.
+<p>
+"""
+        data += "Recipe: %s" % name
+        data += "<p>"
+        data += "Ingredients: %s %s, %s %s" % (ing1, amount1, ing2, amount2)
+        data += """ 
+<p>
+<a href='./'>return to index</a>
+"""
+
+        start_response('200 OK', list(html_headers))
+        return [data]
+
+    def add_liquor_type(self, environ, start_response):
+        loader = jinja2.FileSystemLoader('./drinkz/templates')
+        env = jinja2.Environment(loader=loader)
+
+        vars = dict(title='Add Liquor Type', name='Add Liquor Type')
+
+        template = env.get_template('liquor_types.html')
+        data = template.render(vars).encode('utf-8')
+
+        start_response('200 OK', list(html_headers))
+        return [data]
+
+    def recv_liquor_types(self, environ, start_response):
+        formdata = environ['QUERY_STRING']
+        results = urlparse.parse_qs(formdata)
+
+        mfg = results['manufacturer'][0]
+        liquor = results['liquor'][0]
+        type = results['type'][0]
+
+        db.add_bottle_type(mfg, liquor, type)
+
+        content_type = 'text/html'
+        data = """\
+Added Liquor Type.
+<p>
+"""
+        data += "Manufacturer: %s" % mfg
+        data += "<p>"
+        data += "Liquor: %s" % liquor
+        data += "<p>"
+        data += "Type: %s" % type
+        data += """
+<p>
+<a href='./'>return to index</a>
+"""
+
+        start_response('200 OK', list(html_headers))
+        return [data]
+
+    def add_to_inventory(self, environ, start_response):
+        loader = jinja2.FileSystemLoader('./drinkz/templates')
+        env = jinja2.Environment(loader=loader)
+
+        vars = dict(title='Add to Inventory', name='Add to Inventory')
+
+        template = env.get_template('inventory.html')
+        data = template.render(vars).encode('utf-8')
+
+        start_response('200 OK', list(html_headers))
+        return [data]
+
+    def recv_inventory(self, environ, start_response):
+        formdata = environ['QUERY_STRING']
+        results = urlparse.parse_qs(formdata)
+
+        mfg = results['man'][0]
+        liquor = results['name'][0]
+        amount = results['amount'][0]
+
+        try:
+            db.add_to_inventory(mfg, liquor, amount)
+
+            content_type = 'text/html'
+            data = "Added %s to %s" % (amount, liquor)
+            data += "<p>"
+            data += "<a href='./'>return to index</a>"
+        except db.LiquorMissing:
+            content_type = 'text/html'
+            data = "Liquor or Manufacturer not defined in bottle types."
+            data += "<p>"
+            data += "<a href='./'>return to index</a>"
+
+        start_response('200 OK', list(html_headers))
+        return [data]
+
     def dispatch_rpc(self, environ, start_response):
         # POST requests deliver input data via a file-like handle,
         # with the size of the data specified by CONTENT_LENGTH;
@@ -286,6 +418,19 @@ font-size: 14px;
         for m, l in db.get_liquor_inventory():
             inventory.append((m,l))
         return inventory
+
+    def rpc_add_recipe(self, name, ing1, amount1, ing2=None, amount2=None):
+        if ing2 == None:
+            r = recipes.Recipe(name, [(ing1, amount1)])
+        else:
+            r = recipes.Recipe(name, [(ing1, amount1), (ing2, amount2)])
+        db.add_recipe(r)
+
+    def rpc_add_liquor_type(self, mfg, liquor, type):
+        db.add_bottle_type(mfg, liquor, type)
+
+    def rpc_add_to_inventory(self, mfg, liquor, amount):
+        db.add_to_inventory(mfg, liquor, amount)
     
 def form():
     return """
@@ -312,7 +457,7 @@ Units: <input type='text' name='units' size='20'>
 
 def main(args):
     filename = args[1]
-    load_db(filename)
+    db.load_db(filename)
 
 if __name__ == '__main__':
     main(sys.argv)

@@ -111,6 +111,26 @@ def test_bulk_load_bottle_types_1():
     assert db._check_bottle_type_exists('Johnnie Walker', 'Black Label')
     assert n == 1, n
 
+def test_bulk_load_recipes_1():
+    db._reset_db()
+
+    data = "scotch on the rocks,blended scotch,4 oz,adfs, 8 oz"
+    fp = StringIO(data)
+    n = load_bulk_data.load_recipes(fp)
+
+    assert db.get_recipe('scotch on the rocks').name == 'scotch on the rocks'
+    assert n == 1, n
+
+def test_bulk_load_recipes_2():
+    db._reset_db()
+
+    data = "scotch on the rocks,blended scotch, 4 oz"
+    fp = StringIO(data)
+    n = load_bulk_data.load_recipes(fp)
+
+    assert db.get_recipe('scotch on the rocks').name == 'scotch on the rocks'
+    assert n == 1, n
+
 def test_script_load_bottle_types_1():
     scriptpath = 'bin/load-liquor-types'
     module = imp.load_source('llt', scriptpath)
@@ -123,6 +143,13 @@ def test_script_load_inventory_1():
     module = imp.load_source('llt', scriptpath)
     exit_code = module.main([scriptpath, 'test-data/bottle-types-data-1.txt',
 'test-data/inventory-data-1.txt'])
+
+    assert exit_code == 0, 'non zero exit code %s' % exit_code
+
+def test_script_load_recipes_1():
+    scriptpath = 'bin/load-recipes'
+    module = imp.load_source('llt', scriptpath)
+    exit_code = module.main([scriptpath, 'test-data/recipes-data-1.txt'])
 
     assert exit_code == 0, 'non zero exit code %s' % exit_code
     

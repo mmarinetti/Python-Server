@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<form action='recv_liquor_types'>
+Manufacturer: <input type='text' name='manufacturer' size='20'>
+<p>
+Liquor Name: <input type='text' name='liquor' size='20'>
+<p>
+Type: <input type='text' name='type' size='20'>
+<input type='submit'>
+</form>
+<p>
+<a href='./'>back to index</a>
+
+{% endblock %}
+

@@ -10,7 +10,7 @@ Module to load in bulk data from text files.
 
 import csv                              # Python csv package
 
-from . import db                        # import from local package
+from . import db, recipes               # import from local package
 
 def load_bottle_types(fp):
     """
@@ -58,6 +58,42 @@ def load_inventory(fp):
             db.add_to_inventory(mfg, name, amount)
     except ValueError:
         assert False, 'Incorrect input format.'
+
+    return n
+
+def load_recipes(fp):
+    """
+    Loads in data of the form recipe name/first ingredient/second ingredient from a CSV file.
+
+    Takes a file pointer.
+
+    Adds data to database.
+
+    Returns number of records loaded.
+    """
+    n = 0
+    reader = csv.reader(fp)
+
+    for line in reader:
+        if line[0].startswith('#'):
+            continue
+        if not line[0].strip():
+            continue
+
+        try:
+            (recipe, ing1, amount1, ing2, amount2) = line
+            r = recipes.Recipe(recipe, [(ing1, amount1), (ing2, amount2)])
+            db.add_recipe(r)
+            n += 1
+        except ValueError:
+            try:
+                (recipe, ing1, amount1) = line
+                r = recipes.Recipe(recipe, [(ing1, amount1)])
+                db.add_recipe(r)
+                n += 1
+            except ValueError:
+                assert False, 'Incorrect input format.'
+
 
     return n
 

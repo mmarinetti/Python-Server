@@ -1,5 +1,5 @@
 from sets import Set
-import drinkz.recipes
+import recipes
 
 """
 Database functionality for drinkz information.

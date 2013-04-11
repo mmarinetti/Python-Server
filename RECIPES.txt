@@ -1,0 +1,8 @@
+Lines that start with a '#' will be ignored
+Name of the recipe goes first followed by each ingredient which is followed by the amount
+Each element is separated by commas
+Max number of ingredients is two
+name1,ingredient1,amount1,ingredient2,amount2
+For example:
+scotch on the rocks,blended scotch,4 oz
+vodka martini,unflavored vodka,6 oz,vermouth,1.5 oz

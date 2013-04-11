@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<form action='recv_recipes'>
+Recipe Name: <input type='text' name='name' size='20'>
+<p>
+Ingredient 1: <input type='text' name='ing1' size='20'>
+Amount: <input type='text' name='amount1' size='20'>
+<p>
+Ingredient 2: <input type='text' name='ing2' size='20'>
+Amount: <input type='text' name='amount2' size='20'>
+<input type='submit'>
+</form>
+<p>
+<a href='./'>back to index</a>
+
+{% endblock %}
