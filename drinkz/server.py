@@ -24,7 +24,7 @@ while True:
 
     data = c.recv(1024)
     if data[:3] == "GET":
-        c.send("HTTP/1.0 200 OK")
+        status = "HTTP/1.0 "
         environ = {}
         if '/recipes' in data[4:]:
             environ['PATH_INFO'] = '/recipes'
@@ -45,6 +45,9 @@ while True:
         else:
             environ['PATH_INFO'] = '/error'
         html = app_obj(environ, my_start_response)
+        status += d['status']
+        status +='\n'
+        c.send(status)
         c.send(html[0])
     else:
         c.send("Wrong Format.")

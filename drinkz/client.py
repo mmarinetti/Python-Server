@@ -9,7 +9,7 @@ port = int(sys.argv[1])
 
 print 'connecting...'
 s.connect((host, port))
-s.send("GT /wrong HTTP/1.0\n\n")
+s.send("GET / HTTP/1.0\n\n")
 data = s.recv(1024)
 while data != "":
     print data
