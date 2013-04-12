@@ -1,0 +1,18 @@
+This feature will a user to post a party on the site and post different things about the party.
+This includes the liquor they have, music, crash spots, and if they have any available DD's.
+Other users will be able to view a list of parties and rate them.
+
+Data:
+  Users
+  Ratings
+  Liquor Cabinet
+  Music
+  Crash Spots
+  DD's
+
+API:
+  All of the information about a party will be stored in a class.
+
+Web interface:
+  All of the data about a party will be entered using a form. Users will be able to click a
+link to display a list of parties.
