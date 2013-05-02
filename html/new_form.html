@@ -1,0 +1,39 @@
+<html>
+
+<head>
+<script type="text/javascript" charset="utf-8"
+src="http://code.jquery.com/jquery-1.7.2.min.js"></script>
+</head>
+<body>
+
+Convert: <input type='text' class='a' value='0' size='4' />
+Units: <input type='text' class='b' value='oz' size='20' />
+
+<p class='toupdate' />
+
+<script type="text/javascript">
+
+function update_result(a, e) {
+    text = '<font color="red"><b>'+a+' converted to ml: '+e+'</font></b>';
+    $('p.toupdate').html(text);
+}
+
+function do_add() {
+  a = $('input.a').val();
+  b = $('input.b').val();
+  $.ajax({
+      url: '/rpc',
+      data: JSON.stringify ({method:'convert_units_to_ml', params:[a+' '+b,], id:"0"} ),
+      type: "POST",
+      dataType: "json",
+      success: function (data) { update_result(a, data.result) },
+      error: function (err) { alert ("Error");}
+  });
+}
+
+$('input.a').change(do_add);
+$('input.b').change(do_add);
+</script>
+
+</body>
+</html>

@@ -1,0 +1,14 @@
+import os, sqlite3
+
+try:
+    os.unlink('database.db')
+except OSError:
+    pass
+
+db_bt = sqlite3.connect('database.db')
+c = db_bt.cursor()
+c.execute('CREATE TABLE bottle_types_db (id INTEGER PRIMARY \
+                             KEY ASC, m TEXT, l TEXT, t TEXT)')
+
+c.execute('CREATE TABLE inventory_db (id INTEGER PRIMARY KEY \
+                          ASC, m TEXT, l TEXT, a FLOAT)')

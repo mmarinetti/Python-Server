@@ -1,5 +1,6 @@
 from sets import Set
 import recipes
+import sqlite3, os
 
 """
 Database functionality for drinkz information.
@@ -11,16 +12,42 @@ of the same recipe
 from cPickle import dump, load
 
 # private singleton variables at module level
-_bottle_types_db = Set()
+#_bottle_types_db = Set()
 _inventory_db = {}
 _recipes_db = Set()
+_parties_db = []
+
+"""
+try:
+    os.unlink('bottle_types.db')
+except OSError:
+    pass
+
+db_bt = sqlite3.connect('database.db')
+c = db_bt.cursor()
+c.execute('CREATE TABLE bottle_types_db (id INTEGER PRIMARY KEY ASC, \
+                             m TEXT, l TEXT, t TEXT)')
+
+try:
+    os.unlink('inventory.db')
+except OSError:
+    pass
+
+db_i = sqlite3.connect('inventory.db')
+cursor_inventory = db_i.cursor()
+cursor_inventory.execute('CREATE TABLE inventory_db (id INTEGER PRIMARY KEY ASC, \
+                          m TEXT, l TEXT, a FLOAT)')
+"""
+
+c = sqlite3.connect('database.db').cursor()
 
 def _reset_db():
     "A method only to be used during testing -- toss the existing db info."
-    global _bottle_types_db, _inventory_db, _recipes_db
-    _bottle_types_db = Set()
+    global _bottle_types_db, _inventory_db, _recipes_db, _parties_db
+    #_bottle_types_db = Set()
     _inventory_db = {}
     _recipes_db = Set()
+    _parties_db = []
 
 def save_db(filename):
     fp = open(filename, 'wb')
@@ -47,12 +74,18 @@ class LiquorMissing(Exception):
 def add_bottle_type(mfg, liquor, typ):
     "Add the given bottle type into the drinkz database."
     _bottle_types_db.add((mfg, liquor, typ))
+    #c.execute('INSERT INTO bottle_types_db (m, l, t) VALUES (?, ?, ?)', (mfg, liquor, typ))
+    #sqlite3.connect('database.db').commit()
     _inventory_db[(mfg, liquor)] = 0
 
 def _check_bottle_type_exists(mfg, liquor):
     for (m, l, _) in _bottle_types_db:
         if mfg == m and liquor == l:
             return True
+    #c.execute('SELECT COUNT(1) FROM bottle_types_db WHERE \
+    #           bottle_types_db.m=? AND bottle_types_db.l=?', (mfg, liquor,))
+    #if c.fetchone()[0]:
+    #    return True
 
     return False
 
@@ -64,6 +97,10 @@ def add_to_inventory(mfg, liquor, amount):
 
     # just add it to the inventory database as a tuple, for now.
     a = _inventory_db.get((mfg, liquor))
+    #c.execute('SELECT * FROM bottle_types_db')
+    #c.fetchall()
+    #c.execute('SELECT * FROM inventory_db WHERE m=? AND l=?', (mfg, liquor,))
+    #a = c.fetchone()[2]
     try:
         a += convert_to_ml(amount)
         _inventory_db[(mfg, liquor)] = a
@@ -114,3 +151,10 @@ def get_recipe(name):
 def get_all_recipes():
     for r in _recipes_db:
         yield r
+
+def add_party(p):
+    _parties_db.append(p)
+
+def get_all_parties():
+    for p in _parties_db:
+        yield p
