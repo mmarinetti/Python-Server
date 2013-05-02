@@ -2,6 +2,7 @@ import random
 import socket
 import time
 from app import SimpleApp
+import StringIO
 
 s = socket.socket()
 host = socket.gethostname()
@@ -22,35 +23,50 @@ while True:
     c, addr = s.accept()
     print 'Got connection from', addr
 
-    data = c.recv(1024)
-    if data[:3] == "GET":
-        status = "HTTP/1.0 "
-        environ = {}
-        if '/recipes' in data[4:]:
-            environ['PATH_INFO'] = '/recipes'
-        elif '/inventory' in data[4:]:
-            environ['PATH_INFO'] = '/inventory'
-        elif '/liquor_types' in data[4:]:
-            environ['PATH_INFO'] = '/liquor_types'
-        elif '/convert_to_ml' in data[4:]:
-            environ['PATH_INFO'] = '/convert_to_ml'
-        elif '/add_recipe' in data[4:]:
-            environ['PATH_INFO'] = '/add_recipe'
-        elif '/add_liquor_type' in data[4:]:
-            environ['PATH_INFO'] = '/add_liquor_type'
-        elif '/add_to_inventory' in data[4:]:
-            environ['PATH_INFO'] = '/add_to_inventory'
-        elif '/' in data[5:]:
-            environ['PATH_INFO'] = '/'
-        else:
-            environ['PATH_INFO'] = '/error'
-        html = app_obj(environ, my_start_response)
-        status += d['status']
-        status +='\n'
-        c.send(status)
-        c.send(html[0])
-    else:
-        c.send("Wrong Format.")
-        c.send("GET /[destination]")
+    buffer = c.recv(1024)
 
+    while "\r\n\r\n" not in buffer:
+        data = c.recv(1024)
+        if not data:
+            break
+        buffer += data
+        print (buffer,)
+        time.sleep(1)
+
+    print 'got entire request:', (buffer,)
+
+    lines = buffer.splitlines()
+    request_line = lines[0]
+    c.send(lines[-1:][0])
+    request_type, path, protocol = request_line.split()
+    print 'GOT', request_type, path, protocol
+
+    if request_type == "GET":
+        if '?' in path:
+            path, query_string = path.split('?', 1)
+
+        environ = {}
+        environ['PATH_INFO'] = path
+        environ['QUERY_STRING'] = query_string
+
+    elif request_type == "POST":
+        html = StringIO.StringIO()
+        environ = {}
+        environ['PATH_INFO'] = path
+        environ['REQUEST_METHOD'] = request_type
+        environ['CONTENT_LENGTH'] = 0
+        environ['wsgi.input'] = html 
+
+    results = app_obj(environ, my_start_response)
+
+    response_headers = []
+    for k, v in d['headers']:
+        h = "%s: %s" % (k, v)
+        response_headers.append(h)
+
+    response = "\r\n".join(response_headers) + "\r\n\r\n" + "".join(results)
+
+    c.send("HTTP/1.0 %s\r\n" % d['status'])
+    c.send(response)
     c.close()
+
