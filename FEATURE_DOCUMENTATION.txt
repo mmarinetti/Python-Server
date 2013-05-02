@@ -1,0 +1,4 @@
+The feature I implemented allows you to post parties to the website. You can specify what
+liquor you have at the party, what type of music there will be, the number of crash spots, and
+the number of DDs.  You need to log in to use this feature.  You can then view the list of
+current posted parties.
