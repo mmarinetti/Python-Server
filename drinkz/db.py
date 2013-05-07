@@ -12,7 +12,7 @@ of the same recipe
 from cPickle import dump, load
 
 # private singleton variables at module level
-#_bottle_types_db = Set()
+_bottle_types_db = Set()
 _inventory_db = {}
 _recipes_db = Set()
 _parties_db = []
@@ -44,7 +44,7 @@ c = sqlite3.connect('database.db').cursor()
 def _reset_db():
     "A method only to be used during testing -- toss the existing db info."
     global _bottle_types_db, _inventory_db, _recipes_db, _parties_db
-    #_bottle_types_db = Set()
+    _bottle_types_db = Set()
     _inventory_db = {}
     _recipes_db = Set()
     _parties_db = []
